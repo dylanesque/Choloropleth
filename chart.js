@@ -7,25 +7,75 @@ async function drawChloropleth() {
     'https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json'
   );
 
-  const countyData = topojson.feature(countyDataset, countyDataset.objects.counties).features;
+  // The topojson data needs to be converted to GeoJSON for D3 to be able to work with it
+  const countyData = topojson.feature(
+    countyDataset,
+    countyDataset.objects.counties
+  ).features;
 
-  console.log(countyData);
+  const colors = [
+    "#2C26CE",
+    "#524DCF",
+    "#726EDD",
+    "#9C99EB",
+    "#9794EB",
+    "#C1BEF7",
+    "#EEEDFE"
+  ]
 
   // 2. Draw Chart
   let dimensions = {
-    width: window.innerWidth * 0.9,
+    width: window.innerWidth,
+    height: 600,
     margin: {
       top: 10,
       right: 10,
       bottom: 10,
-      left: 10
-    }
-  }
-  dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right
+      left: 40,
+    },
+  };
+  dimensions.boundedWidth =
+    dimensions.width - dimensions.margin.left - dimensions.margin.right;
 
   // d3.geoAlbers();
 
   // 3. Create Canvas
+  const canvas = d3
+    .select('#canvas')
+    .attr('width', dimensions.width)
+    .attr('height', dimensions.height)
+    .attr('test-align', 'center')
+    .selectAll('path')
+    .data(countyData)
+    .enter()
+    .append('path')
+    // generates a map given the coordinates from the dataset
+    .attr('d', d3.geoPath())
+    .attr('class', 'county')
+    .attr('fill', (datum) => {
+      let countyId = datum.id;
+      let county = eduDataset.find((c) => c.fips === countyId);
+      let eduPercent = county.bachelorsOrHigher;
+      return mapEducationToColor(eduPercent);
+    });
+  
+  function mapEducationToColor(percent) {
+    if (percent > 57) {
+      return colors[6];
+    } else if (percent <= 57 && percent > 48) {
+      return colors[5];
+    } else if (percent <= 48 && percent > 39) {
+      return colors[4];
+    } else if (percent <= 39 && percent > 30) {
+      return colors[3];
+    } else if (percent <= 30 && percent > 21) {
+      return colors[2];
+    } else if (percent <= 21 && percent > 12) {
+      return colors[1];
+    } else {
+      return colors[0];
+    }
+  }
 
   // 4. Create Scales
 

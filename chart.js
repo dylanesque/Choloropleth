@@ -7,6 +7,8 @@ async function drawChloropleth() {
     'https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json'
   );
 
+  console.log(eduDataset);
+
   // The topojson data needs to be converted to GeoJSON for D3 to be able to work with it
   const countyData = topojson.feature(
     countyDataset,
@@ -14,14 +16,14 @@ async function drawChloropleth() {
   ).features;
 
   const colors = [
-    "#2C26CE",
-    "#524DCF",
-    "#726EDD",
-    "#9C99EB",
-    "#9794EB",
-    "#C1BEF7",
-    "#EEEDFE"
-  ]
+    '#2C26CE',
+    '#524DCF',
+    '#726EDD',
+    '#9C99EB',
+    '#9794EB',
+    '#C1BEF7',
+    '#EEEDFE',
+  ];
 
   // 2. Draw Chart
   let dimensions = {
@@ -57,8 +59,20 @@ async function drawChloropleth() {
       let county = eduDataset.find((c) => c.fips === countyId);
       let eduPercent = county.bachelorsOrHigher;
       return mapEducationToColor(eduPercent);
-    });
-  
+    })
+    .attr('data-fips', (datum) => {
+      let countyId = datum.id;
+      let county = eduDataset.find((c) => c.fips === countyId);
+      return county.fips;
+    })
+    .attr('data-education', (datum) => {
+      let countyId = datum.id;
+      let county = eduDataset.find((c) => c.fips === countyId);
+      return county.bachelorsOrHigher;
+    })
+    .on('mouseover', onMouseOver)
+    .on('mouseleave', onMouseLeave);
+
   function mapEducationToColor(percent) {
     if (percent > 57) {
       return colors[6];
@@ -80,6 +94,31 @@ async function drawChloropleth() {
   // 4. Create Scales
 
   // 5. Create Axes
+
+  // 6. Interactions
+
+  const tooltip = d3
+    .select('body')
+    .append('div')
+    .attr('id', 'tooltip')
+    .style('visibility', 'hidden');
+
+  function onMouseOver(d) {
+    console.log(d);
+    tooltip.transition().duration(200).style('visibility', 'visible');
+    tooltip
+      .html("testing"
+      )
+      .style('left', d3.event.pageX + 'px')
+      .style('top', d3.event.pageY - 28 + 'px')
+      .attr('data-year', d.year)
+      .attr('data-month', d.month - 1)
+      .attr('data-temp', varAccessor(d));
+  }
+
+  function onMouseLeave() {
+    tooltip.transition().duration(200).style('visibility', 'hidden');
+  }
 }
 
 drawChloropleth();

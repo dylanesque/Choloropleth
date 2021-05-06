@@ -2,3 +2,16 @@
     display: flex;
     justify-content: center;
 }
+
+div#tooltip {
+  color: white;
+  position: absolute;
+  text-align: center;
+  width: 90px;
+  height: fit-content;
+  padding: 2px;
+  font: 12px sans-serif;
+  background-color: white;
+  border-radius: 8px;
+  pointer-events: none;
+}
